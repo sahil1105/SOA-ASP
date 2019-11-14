@@ -1,0 +1,34 @@
+% Playing with transitive closure and its provenance..
+
+% EXAMPLE 1: 
+% $ dlv tc4.dlv e1.dlv -filter=q -silent
+% {q(a,b), q(b,d), q(b,e), q(d,f), q(e,f)}
+
+% EXAMPLE 2:
+% $ dlv tc4.dlv e1.dlv e2.dlv -filter=q -silent
+% {q(a,b), q(a,c), q(b,d), q(b,e), q(c,d), q(c,e), q(d,f), q(e,f)}
+
+% Simple (right) recursive rules from computing the transitive closure tc of e:
+tc(X,Y) :- e(X,Y).
+tc(X,Y) :- e(X,Z), tc(Z,Y).
+
+% Now a version that also reports 'intermediate' edges IX->IY, i.e.,
+% tc4(X,Y, IX, IY) holds iff (1) Y is reachable from X via an e-path,
+% .. and (2) the edge (IX,IY) is on some such path from X to Y: 
+
+% BASE CASE:
+tc4(X,Y, X,Y) :- e(X,Y).                    % (B)
+
+% In the RECURSIVE CASE, we need to keep all intermediate edges we already have:
+tc4(X,Y, IX,IY) :- e(X,Z), tc4(Z,Y, IX,IY). % (R1)
+
+% ... plus any "new" edges we get:  
+tc4(X,Y, X,Z) :- e(X,Z), tc4(Z,Y, _,_).     % (R2) 
+
+% Output relation: report all intermediate edges on some path from a to f: 
+q(IX,IY) :- tc4(a,f,IX,IY).
+
+% EXERCISE:
+% Do we need both (R1) and (R2) for this to work?
+% => Why (or why not)? 
+

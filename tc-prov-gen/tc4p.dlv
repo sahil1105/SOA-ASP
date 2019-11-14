@@ -1,0 +1,56 @@
+%% When running this
+%% $ dlv tc4p.dlv -filter=q,i
+%% .. you will see all "invented / in" edges in i/2 and the query answers in q/2
+
+%% If you want to count solutions, you could just do this:
+%% $ dlv tc4p.dlv -silent -filter=q,i | wc
+%%      729    6557   53179
+
+%% Now let's look at unique solutions w.r.t. i/2: 
+%% $ dlv tc4p.dlv -silent -filter=i | sort -u | wc
+%%      729    2917   24059
+%% ==> still 729 possible answers.. not surprising (why not?)
+
+
+%% Now let's look at unique solutions w.r.t. q/2:
+%% $ dlv tc4p.dlv -silent -filter=q | sort -u | wc
+%%      266    2177   17676
+%% ==> Aha! Now there are only 266 answers in q ... why? 
+
+
+% Now let's create some 
+% Given edges: 
+e(a,b).
+e(a,c).
+
+e(d,f).
+e(e,f).
+
+% Which nodes All nodes: 
+% n(X) :- e(X,_).
+% n(X) :- e(_,X).
+n(b). n(c). n(d). n(e). 
+    
+% Let's use a GENERATOR: For every pair of edges (X,Y) in a given set of nodes n/1,
+% ... let's either have the edge "in" (= member of i/2) or "out" (= in o/2):
+i(X,Y) v o(X,Y) :- n(X), n(Y), X!=Y. 
+
+% Let's also say that if an edge X,Y is "in", then the reverse edge Y,X cannot be in.
+% This is just to show how one can easily add new constraints (reducing the set of PWs / solutions):
+:- i(X,Y), i(Y,X).
+
+
+% Now let's use the same tc + provenance (= tc with 4 arguments) rules:
+
+% First: let's copy all generated "in" pairs from i/2 to e/2: 
+e(X,Y) :- i(X,Y).
+
+tc4(X,Y, X,Y) :- e(X,Y).
+
+tc4(X,Y, IX,IY) :- e(X,Z), tc4(Z,Y, IX,IY).
+tc4(X,Y, X,Z) :- e(X,Z), tc4(Z,Y, _,_).
+
+% Again, let's see who is on paths from a to f: 
+q(IX,IY) :- tc4(a,f,IX,IY).
+
+

@@ -1,0 +1,10 @@
+% A simple base graph:
+% a ->  b -> d  
+%  \     \    \
+%   \->c  \->e-\->f
+
+e(a,b). e(a,c).
+e(b,d). e(b,e).
+e(d,f). e(e,f).
+
+
