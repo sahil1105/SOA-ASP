@@ -1,3 +1,5 @@
+% -*- Mode: Prolog -*-
+
 %% When running this
 %% $ dlv tc4p.dlv -filter=q,i
 %% .. you will see all "invented / in" edges in i/2 and the query answers in q/2
